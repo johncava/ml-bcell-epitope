@@ -7,6 +7,8 @@ from scipy import linalg
 from scipy.spatial.distance import pdist, squareform
 import torch
 from torch.autograd import Variable
+from utility import *
+from sklearn import metrics
 
 # Definitions of functions
 def accuracy(error):
@@ -197,6 +199,8 @@ for index in array:
         new_array.append(-1.0)
 new_array = np.array(new_array)
 error = y_test - new_array
-
+a,b = calculate_roc(new_array.tolist(),y_test.tolist())
+print a,b
+#print metrics.auc([b],[a])
 deep_acc = accuracy(error)
 print 'Vanilla Deep Learning Model Accuracy: ' ,deep_acc, '%'
