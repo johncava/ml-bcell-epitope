@@ -70,25 +70,30 @@ np.random.shuffle(data)
 data, test = np.array_split(data,2)
 print len(data), len(test)
 data = pd.DataFrame(data)
+'''
+print data.sample(frac=0.008,replace = True)
 y_train = data[data.columns[20]]
 del data[data.columns[20]]
 x_train = data
-x_train = np.array(x_train .as_matrix(), dtype=np.float64)
+x_train = np.array(x_train.as_matrix(), dtype=np.float64)
 y_train = np.array(y_train.values, dtype=np.float64)
-
+'''
+#print data
 test = pd.DataFrame(test)
 y_test = test[test.columns[20]]
 del test[test.columns[20]]
 x_test = test
-x_test = np.array(x_test .as_matrix(), dtype=np.float64)
+x_test = np.array(x_test.as_matrix(), dtype=np.float64)
 y_test = np.array(y_test.values, dtype=np.float64)
 
+'''
 # SVM RBF Training 
 clf = svm.SVC(kernel='rbf')
 clf.fit(x_train,y_train)
 ans = clf.predict(x_test)
 error =  y_test - ans
 print 'Sci-kit Learn SVM Vanilla Model: ', accuracy(error)
+'''
 
 '''
 # SVM  RBF hyperparameters
@@ -129,7 +134,7 @@ print 'Done'
 #   Support Vector Machine trained by gradient descent can match svm from sklearn
 #   However may be less accurate
 ###
-
+'''
 inpt_train_x = torch.from_numpy(x_train)
 inpt_train_x = inpt_train_x.float()
 inpt_train_y = torch.from_numpy(y_train)
@@ -137,26 +142,37 @@ inpt_train_y = inpt_train_y.float()
 
 inpt_train_x = Variable(inpt_train_x)
 inpt_train_y = Variable(inpt_train_y, requires_grad=False)
-
+'''
 # Vanilla Deep Learning Model
 model = torch.nn.Sequential(
     torch.nn.Linear(20, 40),
-    torch.nn.LeakyReLU(0.2),
-    torch.nn.Dropout(),
-    torch.nn.Linear(40,20),
     torch.nn.LeakyReLU(0.1),
-    torch.nn.Dropout(),
-    torch.nn.Linear(20,1),
+    torch.nn.Linear(40,40),
+    torch.nn.LeakyReLU(0.1),
+    torch.nn.Linear(40,1),
     torch.nn.Tanh()   
 )
 
-loss_fn = torch.nn.BCELoss(size_average=False)
+loss_fn = torch.nn.MSELoss(size_average=False)
 
 learning_rate = 2e-4
 
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-for iteration in range(200):
-
+for iteration in range(800):
+    mini_batch = data.sample(frac=0.05,replace = True)
+    y_train = mini_batch[mini_batch.columns[20]]
+    del mini_batch[mini_batch.columns[20]]
+    x_train = mini_batch
+    x_train = np.array(x_train.as_matrix(), dtype=np.float64)
+    y_train = np.array(y_train.values, dtype=np.float64)
+    
+    inpt_train_x = torch.from_numpy(x_train)
+    inpt_train_x = inpt_train_x.float()
+    inpt_train_y = torch.from_numpy(y_train)
+    inpt_train_y = inpt_train_y.float()
+    inpt_train_x = Variable(inpt_train_x)
+    inpt_train_y = Variable(inpt_train_y, requires_grad=False)
+    
     y_pred = model(inpt_train_x)
     loss = loss_fn(y_pred, inpt_train_y)
     '''
