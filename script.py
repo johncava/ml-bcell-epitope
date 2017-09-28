@@ -65,7 +65,10 @@ with open('neg.data') as f:
 
 # Data preparation
 data = pos_data + neg_data
+data = np.array(data)
 np.random.shuffle(data)
+data, test = np.array_split(data,2)
+print len(data), len(test)
 data = pd.DataFrame(data)
 y_train = data[data.columns[20]]
 del data[data.columns[20]]
@@ -73,11 +76,18 @@ x_train = data
 x_train = np.array(x_train .as_matrix(), dtype=np.float64)
 y_train = np.array(y_train.values, dtype=np.float64)
 
+test = pd.DataFrame(test)
+y_test = test[test.columns[20]]
+del test[test.columns[20]]
+x_test = test
+x_test = np.array(x_test .as_matrix(), dtype=np.float64)
+y_test = np.array(y_test.values, dtype=np.float64)
+
 # SVM RBF Training 
 clf = svm.SVC(kernel='rbf')
 clf.fit(x_train,y_train)
-ans = clf.predict(x_train)
-error =  y_train - ans
+ans = clf.predict(x_test)
+error =  y_test - ans
 print 'Sci-kit Learn SVM Vanilla Model: ', accuracy(error)
 
 '''
@@ -130,32 +140,35 @@ inpt_train_y = Variable(inpt_train_y, requires_grad=False)
 
 # Vanilla Deep Learning Model
 model = torch.nn.Sequential(
-    torch.nn.Linear(20, 120),
-    torch.nn.ReLU(),
-    torch.nn.Linear(120, 120),
-    torch.nn.ReLU(),
-    torch.nn.Linear(120, 10),
-    torch.nn.ReLU(),
-    torch.nn.Linear(10,1)
+    torch.nn.Linear(20, 40),
+    torch.nn.LeakyReLU(0.2),
+    torch.nn.Dropout(),
+    torch.nn.Linear(40,20),
+    torch.nn.LeakyReLU(0.1),
+    torch.nn.Dropout(),
+    torch.nn.Linear(20,1),
+    torch.nn.Tanh()   
 )
 
-loss_fn = torch.nn.MSELoss(size_average=False)
+loss_fn = torch.nn.BCELoss(size_average=False)
 
-learning_rate = 1e-4
+learning_rate = 2e-4
 
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-for iteration in range(5000):
+for iteration in range(200):
 
     y_pred = model(inpt_train_x)
     loss = loss_fn(y_pred, inpt_train_y)
+    '''
     if iteration%100 == 0:
         print loss
+    '''
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
 
 
-inpt_test_x = torch.from_numpy(x_train)
+inpt_test_x = torch.from_numpy(x_test)
 inpt_test_x = inpt_test_x.float()
 inpt_test_x = Variable(inpt_test_x)
 
@@ -167,7 +180,7 @@ for index in array:
     if index[0] < 0.0:
         new_array.append(-1.0)
 new_array = np.array(new_array)
-error = y_train - new_array
+error = y_test - new_array
 
 deep_acc = accuracy(error)
 print 'Vanilla Deep Learning Model Accuracy: ' ,deep_acc, '%'
