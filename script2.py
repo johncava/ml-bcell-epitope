@@ -19,7 +19,7 @@ def accuracy(error):
     return (num/len(error))*100
 
 # Hot Vector Representations for Amino Acids
-table = {'A': [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+table_hot = {'A': [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
          'R': [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
          'N': [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
          'D': [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -40,6 +40,28 @@ table = {'A': [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
          'Y': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],
          'V': [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]}
 
+# Float representations for Amino Acids
+table_float = {'A':1.0,
+         'R':2.0,
+         'N':3.0,
+         'D':4.0,
+         'C':5.0,
+         'E':6.0,
+         'Q':7.0,
+         'G':8.0,
+         'H':9.0,
+         'I':10.0,
+         'L':11.0,
+         'K':12.0,
+         'M':13.0,
+         'F':14.0,
+         'P':15.0,
+         'S':16.0,
+         'T':17.0,
+         'W':18.0,
+         'Y':19.0,
+         'V':20.0}
+
 # Positive and Negative Datasets
 pos_data = []
 neg_data = []
@@ -50,7 +72,7 @@ with open('pos.data') as f:
         l = []
         line = line.rstrip()
         for AA in line:
-            l.append(table[AA]/20.0)
+            l.append(table_hot[AA])
         l.append(1.0)
         pos_data.append(l)
 
@@ -60,7 +82,7 @@ with open('neg.data') as f:
         l = []
         line = line.rstrip()
         for AA in line:
-            l.append(table[AA]/20.0)
+            l.append(table_hot[AA])
         l.append(-1.0)
         neg_data.append(l)
 
@@ -102,6 +124,7 @@ model = torch.nn.Sequential(
 )
 '''
 
+<<<<<<< HEAD
 class Discrim(nn.Module):
     def __init__(self):
         super(Discrim, self).__init__()
@@ -110,20 +133,37 @@ class Discrim(nn.Module):
         self.drop = torch.nn.Dropout()
         self.p1 = torch.nn.MaxPool1d(2)
         self.c2 = torch.nn.Conv1d(20,1,2)
+=======
+class Discrim(torch.nn.Module):
+    def __init__(self):
+        super(Discrim, self).__init__()
+        self.c1 = torch.nn.Conv1d(1,5,3)
+        self.relu = torch.nn.LeakyReLU(0.1)
+	self.drop = torch.nn.Dropout(p=0.2)
+        self.p1 = torch.nn.MaxPool1d(2)
+        self.c2 = torch.nn.Conv1d(5,1,2)
+>>>>>>> 0ae4e064ba514e1210df554f53110f1f01718c1c
         #torch.nn.LeakyReLU(0.1)
         #torch.nn.Dropout()
         self.p2 = torch.nn.MaxPool1d(2)
         self.linear = torch.nn.Linear(4,4)
         self.linear2 = torch.nn.Linear(4,1)
+<<<<<<< HEAD
         self.tanh = torch.nn.TanH()
 
 	def forward(self, input):
+=======
+        self.tanh = torch.nn.Tanh()
+        
+    def forward(self, input):
+>>>>>>> 0ae4e064ba514e1210df554f53110f1f01718c1c
         x = self.c1(input)
         x = self.relu(x)
         x = self.drop(x)
         x = self.p1(x)
         x = self.c2(x)
         x = self.relu(x)
+<<<<<<< HEAD
         x = self.drop(x)
         x = self.p2(x)
         x = self.linear(x)
@@ -134,11 +174,29 @@ class Discrim(nn.Module):
 loss_fn = torch.nn.MSELoss(size_average=False)
 
 learning_rate = 2e-4
+=======
+        #x = self.drop(x)
+        x = self.p2(x).view(1,4)
+        x = self.linear2(x)
+	'''
+        #x = self.drop(x)
+        x = self.linear2(x)
+        '''
+	return self.tanh(x)
+
+loss_fn = torch.nn.MSELoss(size_average=False)
+
+learning_rate = 1e-4
+>>>>>>> 0ae4e064ba514e1210df554f53110f1f01718c1c
 
 model = Discrim()
 
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+<<<<<<< HEAD
 for iteration in range(800):
+=======
+for iteration in range(1500):
+>>>>>>> 0ae4e064ba514e1210df554f53110f1f01718c1c
     mini_batch = data.sample(n = 1,replace = True)
     y_train = mini_batch[mini_batch.columns[20]]
     del mini_batch[mini_batch.columns[20]]
@@ -153,15 +211,26 @@ for iteration in range(800):
     inpt_train_x = Variable(inpt_train_x)
     inpt_train_y = Variable(inpt_train_y, requires_grad=False)
     
+<<<<<<< HEAD
     y_pred = model(inpt_train_x)
     loss = loss_fn(y_pred, inpt_train_y)
     if iteration%100 == 0:
         print loss
+=======
+    y_pred = model(inpt_train_x.view(1,1,20))
+    loss = loss_fn(y_pred, inpt_train_y)
+    if iteration%100 == 0:
+        print loss[0].data.numpy()
+>>>>>>> 0ae4e064ba514e1210df554f53110f1f01718c1c
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
 
+<<<<<<< HEAD
 
+=======
+'''
+>>>>>>> 0ae4e064ba514e1210df554f53110f1f01718c1c
 inpt_test_x = torch.from_numpy(x_test)
 inpt_test_x = inpt_test_x.float()
 inpt_test_x = Variable(inpt_test_x)
@@ -180,3 +249,8 @@ print a,b
 #print metrics.auc([b],[a])
 deep_acc = accuracy(error)
 print 'Vanilla Deep Learning Model Accuracy: ' ,deep_acc, '%'
+<<<<<<< HEAD
+=======
+'''
+print "done"
+>>>>>>> 0ae4e064ba514e1210df554f53110f1f01718c1c
