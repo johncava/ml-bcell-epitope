@@ -161,16 +161,16 @@ class Discrim(torch.nn.Module):
 class Discrim(torch.nn.Module):
     def __init__(self):
         super(Discrim, self).__init__()
-        self.c1 = torch.nn.Conv2d(1,20,3)
-        self.relu = torch.nn.LeakyReLU(0.1)
-        self.drop = torch.nn.Dropout()
-        self.p1 = torch.nn.MaxPool2d(2)
-        self.c2 = torch.nn.Conv2d(20,1,2)
-        #torch.nn.LeakyReLU(0.1)
-        #torch.nn.Dropout()
-        self.p2 = torch.nn.MaxPool2d(2)
-        self.linear = torch.nn.Linear(4,4)
-        self.linear2 = torch.nn.Linear(4,1)
+        self.c1 = nn.Conv2d(1,10,3)
+        self.relu = nn.LeakyReLU(0.2)
+        self.drop = nn.Dropout()
+        self.p1 = nn.MaxPool2d(2)
+        self.c2 = nn.Conv2d(10,10,2)
+        self.relu2 = nn.LeakyReLU(0.1)
+        self.p2 = nn.MaxPool2d(2)
+        self.c3 = nn.Conv2d(10,1,1)
+        self.p3 = nn.MaxPool2d(2)
+        self.linear = nn.Linear(4,1)
         self.tanh = torch.nn.Tanh()
 
     def forward(self, input):
@@ -179,17 +179,12 @@ class Discrim(torch.nn.Module):
         x = self.drop(x)
         x = self.p1(x)
         x = self.c2(x)
-        x = self.relu(x)
+        x = self.relu2(x)
         x = self.drop(x)
-        print x
-        print x.squeeze()
         x = self.p2(x)
+        x = self.c3(x)
+        x = self.p3(x)
         x = self.linear(x)
-	print x
-	print x.squeeze()
-        x = self.drop(x)
-        x = x.view(1,4)
-        x = self.linear2(x)
         return self.tanh(x)
 
 loss_fn = torch.nn.MSELoss(size_average=False)
@@ -205,7 +200,7 @@ for iteration in range(800):
     del mini_batch[mini_batch.columns[20]]
     x_train = mini_batch
     x_train = x_train.values.tolist()[0]
-    #print x_train
+
     x_train = np.array(x_train)
     y_train = np.array(y_train.values, dtype=np.float64)    
     inpt_train_x = torch.from_numpy(x_train)
@@ -214,8 +209,8 @@ for iteration in range(800):
     inpt_train_y = inpt_train_y.float()
     inpt_train_x = Variable(inpt_train_x)
     inpt_train_y = Variable(inpt_train_y, requires_grad=False)
-    print inpt_train_x.view(1,20,20)
-    y_pred = model(inpt_train_x.view(1,20,20))
+
+    y_pred = model(inpt_train_x.view(1,1,20,20))
     loss = loss_fn(y_pred, inpt_train_y)
     if iteration%100 == 0:
         print loss[0].data.numpy()
