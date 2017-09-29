@@ -99,7 +99,7 @@ print data.sample(frac=0.008,replace = True)
 y_train = data[data.columns[20]]
 del data[data.columns[20]]
 x_train = data
-x_train = np.array(x_train.as_matrix(), dtype=np.float64)
+x_train = x_train.as_matrix()
 y_train = np.array(y_train.values, dtype=np.float64)
 '''
 #print data
@@ -107,7 +107,7 @@ test = pd.DataFrame(test)
 y_test = test[test.columns[20]]
 del test[test.columns[20]]
 x_test = test
-x_test = np.array(x_test.as_matrix(), dtype=np.float64)
+x_test = x_test.as_matrix()
 y_test = np.array(y_test.values, dtype=np.float64)
 
 # Vanilla Deep Learning Model
@@ -124,7 +124,7 @@ model = torch.nn.Sequential(
 )
 '''
 
-class Discrim(nn.Module):
+class Discrim(torch.nn.Module):
     def __init__(self):
         super(Discrim, self).__init__()
         self.c1 = torch.nn.Conv1d(1,20,3)
@@ -137,7 +137,7 @@ class Discrim(nn.Module):
         self.p2 = torch.nn.MaxPool1d(2)
         self.linear = torch.nn.Linear(4,4)
         self.linear2 = torch.nn.Linear(4,1)
-        self.tanh = torch.nn.TanH()
+        self.tanh = torch.nn.Tanh()
 
     def forward(self, input):
         x = self.c1(input)
@@ -150,7 +150,7 @@ class Discrim(nn.Module):
         x = self.p2(x)
         x = self.linear(x)
         x = self.drop(x)
-	    x = x.view(1,4)
+	x = x.view(1,4)
         x = self.linear2(x)
         return self.tanh(x)
 
@@ -166,9 +166,9 @@ for iteration in range(800):
     y_train = mini_batch[mini_batch.columns[20]]
     del mini_batch[mini_batch.columns[20]]
     x_train = mini_batch
-    x_train = np.array(x_train.as_matrix(), dtype=np.float64)
+    x_train = x_train.as_matrix()
     y_train = np.array(y_train.values, dtype=np.float64)
-    
+    print x_train    
     inpt_train_x = torch.from_numpy(x_train)
     inpt_train_x = inpt_train_x.float()
     inpt_train_y = torch.from_numpy(y_train)
