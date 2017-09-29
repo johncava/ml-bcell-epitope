@@ -161,16 +161,16 @@ class Discrim(torch.nn.Module):
 class Discrim(torch.nn.Module):
     def __init__(self):
         super(Discrim, self).__init__()
-        self.c1 = nn.Conv2d(1,10,3)
-        self.relu = nn.LeakyReLU(0.2)
-        self.drop = nn.Dropout()
-        self.p1 = nn.MaxPool2d(2)
-        self.c2 = nn.Conv2d(10,10,2)
-        self.relu2 = nn.LeakyReLU(0.1)
-        self.p2 = nn.MaxPool2d(2)
-        self.c3 = nn.Conv2d(10,1,1)
-        self.p3 = nn.MaxPool2d(2)
-        self.linear = nn.Linear(4,1)
+        self.c1 = torch.nn.Conv2d(1,10,3)
+        self.relu =torch. nn.LeakyReLU(0.2)
+        self.drop = torch.nn.Dropout()
+        self.p1 = torch.nn.MaxPool2d(2)
+        self.c2 = torch.nn.Conv2d(10,10,2)
+        self.relu2 = torch.nn.LeakyReLU(0.1)
+        self.p2 = torch.nn.MaxPool2d(2)
+        self.c3 = torch.nn.Conv2d(10,1,1)
+        self.p3 = torch.nn.MaxPool2d(2)
+        self.linear = torch.nn.Linear(4,1)
         self.tanh = torch.nn.Tanh()
 
     def forward(self, input):
@@ -184,7 +184,7 @@ class Discrim(torch.nn.Module):
         x = self.p2(x)
         x = self.c3(x)
         x = self.p3(x)
-        x = self.linear(x)
+        x = self.linear(x.view(1,4))
         return self.tanh(x)
 
 loss_fn = torch.nn.MSELoss(size_average=False)
@@ -194,7 +194,7 @@ learning_rate = 2e-4
 model = Discrim()
 
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-for iteration in range(800):
+for iteration in range(5000):
     mini_batch = data.sample(n = 1,replace = True)
     y_train = mini_batch[mini_batch.columns[20]]
     del mini_batch[mini_batch.columns[20]]
