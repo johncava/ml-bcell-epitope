@@ -139,7 +139,7 @@ class Discrim(nn.Module):
         self.linear2 = torch.nn.Linear(4,1)
         self.tanh = torch.nn.TanH()
 
-	def forward(self, input):
+    def forward(self, input):
         x = self.c1(input)
         x = self.relu(x)
         x = self.drop(x)
@@ -149,7 +149,8 @@ class Discrim(nn.Module):
         x = self.drop(x)
         x = self.p2(x)
         x = self.linear(x)
-        x = self.drop()
+        x = self.drop(x)
+	x = x.view(1,4)
         x = self.linear2(x)
         return self.tanh(x)
 
@@ -175,7 +176,7 @@ for iteration in range(800):
     inpt_train_x = Variable(inpt_train_x)
     inpt_train_y = Variable(inpt_train_y, requires_grad=False)
     
-    y_pred = model(inpt_train_x.view(1,1,20))
+    y_pred = model(inpt_train_x.view(1,20,20))
     loss = loss_fn(y_pred, inpt_train_y)
     if iteration%100 == 0:
         print loss[0].data.numpy()
