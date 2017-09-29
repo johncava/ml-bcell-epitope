@@ -83,7 +83,7 @@ with open('neg.data') as f:
         line = line.rstrip()
         for AA in line:
             l.append(table_hot[AA])
-        l.append(-1.0)
+        l.append(0.0)
         neg_data.append(l)
 
 
@@ -103,13 +103,13 @@ x_train = data
 y_train = np.array(y_train.values, dtype=np.float64)
 '''
 #print data
-test = pd.DataFrame(test)
-y_test = test[test.columns[20]]
-del test[test.columns[20]]
-x_test = test
+#test = pd.DataFrame(test)
+#y_test = test[test.columns[20]]
+#del test[test.columns[20]]
+#x_test = test
 #x_test = x_test.as_matrix()
-y_test = np.array(y_test.values, dtype=np.float64)
-
+#y_test = np.array(y_test.values, dtype=np.float64)
+#
 # Vanilla Deep Learning Model
 '''
 model = torch.nn.Sequential(
@@ -172,6 +172,7 @@ class Discrim(torch.nn.Module):
         self.p3 = torch.nn.MaxPool2d(2)
         self.linear = torch.nn.Linear(4,1)
         self.tanh = torch.nn.Tanh()
+	self.sigmoid = torch.nn.Sigmoid()
 
     def forward(self, input):
         x = self.c1(input)
@@ -185,11 +186,11 @@ class Discrim(torch.nn.Module):
         x = self.c3(x)
         x = self.p3(x)
         x = self.linear(x.view(1,4))
-        return self.tanh(x)
+        return self.sigmoid(x)
 
-loss_fn = torch.nn.MSELoss(size_average=False)
+loss_fn = torch.nn.MSELoss(size_average=True)
 
-learning_rate = 2e-4
+learning_rate = 1e-6
 
 model = Discrim()
 
@@ -217,11 +218,34 @@ for iteration in range(5000):
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
-
+'''
+print x_test[0]
 inpt_test_x = torch.from_numpy(x_test)
 inpt_test_x = inpt_test_x.float()
 inpt_test_x = Variable(inpt_test_x)
-
+'''
+total = 0
+correct = 0
+prediction = -1
+for item in test:
+	features ,label = item[:20],item[20]
+	features = features.tolist()
+	#print features
+	features = np.array(features)
+	label = np.array(label, dtype=np.float64)
+	features = torch.from_numpy(features)
+	features = features.float()
+	features = Variable(features)
+	predict = model.forward(features.view(1,1,20,20)).data.numpy()
+	
+	if predict[0][0] < 5.0:
+		prediction = 0.0
+	else:
+		prediction = 1.0
+	if prediction == label:
+		correct = correct + 1
+	total = total + 1
+print correct, correct/total
 '''
 array = model.forward(inpt_test_x).data.numpy()
 new_array = []
