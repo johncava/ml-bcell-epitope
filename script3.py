@@ -78,12 +78,12 @@ class Discrim(torch.nn.Module):
 
 loss_fn = torch.nn.MSELoss(size_average=True)
 
-learning_rate = 1e-6
+learning_rate = 1e-4
 
 model = Discrim()
 
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-for iteration in range(1):
+for iteration in range(1000):
 
     inpt_train_y = torch.from_numpy(np.array([y]))
     inpt_train_y = inpt_train_y.double()
@@ -101,22 +101,23 @@ total = 0
 correct = 0
 prediction = -1
 test = test.tolist()
-for item in xrange(test)t:
+for item in xrange(len(test)):
 	features ,label = test[item][0], test[item][1]
-	#print features
 	features = np.array(features)
 	label = np.array(label, dtype=np.float64)
 	features = torch.from_numpy(features)
 	features = features.float()
 	features = Variable(features)
-	predict = model.forward(features.view(1,1,20,20)).data.numpy()
+	predict = model.forward(features.view(1,3,100).double()).data.numpy()
 	
-	if predict[0][0] < 5.0:
-		prediction = 0.0
+	if predict[0][0] < 0.0:
+		prediction = -1.0
+		#print "hi"
 	else:
 		prediction = 1.0
+		#print "world!"
 	if prediction == label:
 		correct = correct + 1
 	total = total + 1
-print correct, correct/total
+print correct, correct/total, total
 print "done"
