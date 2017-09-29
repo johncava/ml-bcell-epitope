@@ -20,11 +20,6 @@ neg_data = []
 with open('pos.data') as f:
     for line in f:
         line = line.rstrip()
-        '''
-        for AA in line:
-            l.append(table_hot[AA])
-        l.append(1.0)
-        '''
         p = embedding(protvec,line)
         pos_data.append([p,1.0])
 
@@ -33,11 +28,6 @@ with open('neg.data') as f:
     for line in f:
         n = []
         line = line.rstrip()
-        '''
-        for AA in line:
-            l.append(table_hot[AA])
-        l.append(-1.0)
-        '''
         n = embedding(protvec, line)
         neg_data.append([n,-1.0])
 
@@ -94,18 +84,7 @@ model = Discrim()
 
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 for iteration in range(1):
-    '''
-    mini_batch = data.sample(n = 1,replace = True)
-    y_train = mini_batch[mini_batch.columns[20]]
-    del mini_batch[mini_batch.columns[20]]
-    x_train = mini_batch
-    x_train = x_train.values.tolist()[0]
 
-    x_train = np.array(x_train)
-    y_train = np.array(y_train.values, dtype=np.float64)    
-    inpt_train_x = torch.from_numpy(x_train)
-    inpt_train_x = inpt_train_x.float()
-    '''
     inpt_train_y = torch.from_numpy(np.array([y]))
     inpt_train_y = inpt_train_y.double()
     inpt_train_y = Variable(inpt_train_y, requires_grad=False)
@@ -117,13 +96,13 @@ for iteration in range(1):
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
-'''
+
 total = 0
 correct = 0
 prediction = -1
-for item in test:
-	features ,label = item[:20],item[20]
-	features = features.tolist()
+test = test.tolist()
+for item in xrange(test)t:
+	features ,label = test[item][0], test[item][1]
 	#print features
 	features = np.array(features)
 	label = np.array(label, dtype=np.float64)
@@ -141,4 +120,3 @@ for item in test:
 	total = total + 1
 print correct, correct/total
 print "done"
-'''
