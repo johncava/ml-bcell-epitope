@@ -26,7 +26,7 @@ with open('pos.data') as f:
         l.append(1.0)
         '''
         p = embedding(protvec,line)
-        pos_data.append(p)
+        pos_data.append([p,1.0])
 
 # Read in the Negative Dataset
 with open('neg.data') as f:
@@ -36,10 +36,10 @@ with open('neg.data') as f:
         '''
         for AA in line:
             l.append(table_hot[AA])
-        l.append(0.0)
+        l.append(-1.0)
         '''
         n = embedding(protvec, line)
-        neg_data.append(n)
+        neg_data.append([n,-1.0])
 
 
 # Data preparation
@@ -49,22 +49,27 @@ np.random.shuffle(data)
 data, test = np.array_split(data,2)
 print len(data), len(test)
 
-print data.tolist()
+data = data.tolist()
+x,y = data[0][0], data[0][1]
+print x
+print y
+input = Variable(torch.from_numpy(np.array(x))).view(1,3,100).double()
+print input
 
 # 1D convolution
 class Discrim(torch.nn.Module):
     def __init__(self):
         super(Discrim, self).__init__()
-        self.c1 = torch.nn.Conv1d(1,20,3)
+        self.c1 = torch.nn.Conv1d(3,20,3).double()
         self.relu = torch.nn.LeakyReLU(0.1)
         self.drop = torch.nn.Dropout()
         self.p1 = torch.nn.MaxPool1d(2)
-        self.c2 = torch.nn.Conv1d(20,1,2)
+        self.c2 = torch.nn.Conv1d(20,1,2).double()
         #torch.nn.LeakyReLU(0.1)
         #torch.nn.Dropout()
         self.p2 = torch.nn.MaxPool1d(2)
-        self.linear = torch.nn.Linear(4,4)
-        self.linear2 = torch.nn.Linear(4,1)
+        self.linear = torch.nn.Linear(24,12).double()
+        self.linear2 = torch.nn.Linear(12,1).double()
         self.tanh = torch.nn.Tanh()
 
     def forward(self, input):
@@ -75,16 +80,12 @@ class Discrim(torch.nn.Module):
         x = self.c2(x)
         x = self.relu(x)
         x = self.drop(x)
-	print x
-	print x.squeeze()
         x = self.p2(x)
-        x = self.linear(x)
+        x = self.linear(x.view(1,24))
         x = self.drop(x)
-	x = x.view(1,4)
         x = self.linear2(x)
         return self.tanh(x)
 
-'''
 loss_fn = torch.nn.MSELoss(size_average=True)
 
 learning_rate = 1e-6
@@ -92,7 +93,8 @@ learning_rate = 1e-6
 model = Discrim()
 
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-for iteration in range(5000):
+for iteration in range(1):
+    '''
     mini_batch = data.sample(n = 1,replace = True)
     y_train = mini_batch[mini_batch.columns[20]]
     del mini_batch[mini_batch.columns[20]]
@@ -103,19 +105,19 @@ for iteration in range(5000):
     y_train = np.array(y_train.values, dtype=np.float64)    
     inpt_train_x = torch.from_numpy(x_train)
     inpt_train_x = inpt_train_x.float()
-    inpt_train_y = torch.from_numpy(y_train)
-    inpt_train_y = inpt_train_y.float()
-    inpt_train_x = Variable(inpt_train_x)
+    '''
+    inpt_train_y = torch.from_numpy(np.array([y]))
+    inpt_train_y = inpt_train_y.double()
     inpt_train_y = Variable(inpt_train_y, requires_grad=False)
-
-    y_pred = model(inpt_train_x.view(1,1,20,20))
+    print inpt_train_y
+    y_pred = model(input)
     loss = loss_fn(y_pred, inpt_train_y)
     if iteration%100 == 0:
         print loss[0].data.numpy()
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
-
+'''
 total = 0
 correct = 0
 prediction = -1
