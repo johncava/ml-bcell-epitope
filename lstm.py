@@ -1,3 +1,4 @@
+from __future__ import division
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
@@ -89,11 +90,12 @@ train_y = torch.from_numpy(train_y)
 train_y = train_y.float()
 train_y = Variable(train_y)
 '''
-iterations = 100
-lstm = nn.LSTM(20,1,2)
+iterations = 5000
+lstm = nn.LSTM(20,1,3)
 loss_fn = torch.nn.MSELoss(size_average=False)
 learning_rate = 1e-4
 
+sigmoid = nn.Sigmoid()
 optimizer = torch.optim.Adam(lstm.parameters(), lr=learning_rate)
 
 for iteration in xrange(iterations):
@@ -112,9 +114,35 @@ for iteration in xrange(iterations):
 	train_y = Variable(train_y)
 
 	output, _ = lstm(train_x)
+	output = sigmoid(output)
 	last_output = output[-1]
 	loss = loss_fn(last_output, train_y)
-	print loss.data[0]
+	if iteration%100 == 0:
+		print loss.data[0]
 	optimizer.zero_grad()
 	loss.backward()
-	optimizer.step()	
+	optimizer.step()
+
+total = 0
+correct = 0
+prediction = -1
+test = test.tolist()
+for item in xrange(len(test)):
+        features ,label = test[item][:20], test[item][-1]
+        features = np.array(features)
+        label = np.array(label, dtype=np.float64)
+        features = torch.from_numpy(features)
+        features = features.float()
+        features = Variable(features)
+        predict, _ = lstm(features.view(20,1,20))
+	predict = sigmoid(predict)
+	predict =  predict[-1][0][0].data[0]
+        if predict < 0.5:
+                prediction = 0.0
+        else:
+                prediction = 1.0
+        if prediction == label:
+                correct = correct + 1
+        total = total + 1
+print correct, correct/total, total
+	

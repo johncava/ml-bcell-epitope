@@ -139,6 +139,7 @@ class Discrim(torch.nn.Module):
         self.linear = torch.nn.Linear(4,4)
         self.linear2 = torch.nn.Linear(4,1)
         self.tanh = torch.nn.Tanh()
+	self.sig = torch.nn.Sigmoid()
 
     def forward(self, input):
         x = self.c1(input)
@@ -155,7 +156,7 @@ class Discrim(torch.nn.Module):
         x = self.drop(x)
 	x = x.view(1,4)
         x = self.linear2(x)
-        return self.tanh(x)
+        return self.sig(x)
 '''
 
 class Discrim(torch.nn.Module):
@@ -190,7 +191,7 @@ class Discrim(torch.nn.Module):
 
 loss_fn = torch.nn.MSELoss(size_average=True)
 
-learning_rate = 1e-6
+learning_rate = 1e-4
 
 model = Discrim()
 
@@ -238,7 +239,7 @@ for item in test:
 	features = Variable(features)
 	predict = model.forward(features.view(1,1,20,20)).data.numpy()
 	
-	if predict[0][0] < 5.0:
+	if predict[0][0] < 0.5:
 		prediction = 0.0
 	else:
 		prediction = 1.0
@@ -250,7 +251,7 @@ print correct, correct/total
 array = model.forward(inpt_test_x).data.numpy()
 new_array = []
 for index in array:
-    if index[0] >= 0.0:
+    if index[0] >= 0.5:
         new_array.append(1.0)
     if index[0] < 0.0:
         new_array.append(-1.0)
