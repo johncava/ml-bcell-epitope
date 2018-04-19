@@ -90,13 +90,16 @@ train_y = torch.from_numpy(train_y)
 train_y = train_y.float()
 train_y = Variable(train_y)
 '''
-iterations = 5000
+iterations = 100
 lstm = nn.LSTM(20,1,3)
 loss_fn = torch.nn.MSELoss(size_average=False)
 learning_rate = 1e-4
 
 sigmoid = nn.Sigmoid()
 optimizer = torch.optim.Adam(lstm.parameters(), lr=learning_rate)
+
+hidden = (Variable(torch.randn(3, 1, 1)),
+          Variable(torch.randn((3, 1, 1))))
 
 for iteration in xrange(iterations):
 	num = np.random.choice(len(data),1)
@@ -108,19 +111,19 @@ for iteration in xrange(iterations):
 	train_x = Variable(train_x)
 	train_x = train_x.view(20,1,20)
 
-	train_y = np.array([train_y])
+	train_y = np.array([[train_y]])
 	train_y = torch.from_numpy(train_y)
 	train_y = train_y.float()
 	train_y = Variable(train_y)
 
-	output, _ = lstm(train_x)
+	output, hidden = lstm(train_x, hidden)
 	output = sigmoid(output)
 	last_output = output[-1]
 	loss = loss_fn(last_output, train_y)
-	if iteration%100 == 0:
-		print loss.data[0]
+	if iteration%1 == 0:
+		print loss[0].data.numpy().tolist()
 	optimizer.zero_grad()
-	loss.backward()
+	loss.backward(retain_graph=True)
 	optimizer.step()
 
 total = 0
@@ -134,9 +137,9 @@ for item in xrange(len(test)):
         features = torch.from_numpy(features)
         features = features.float()
         features = Variable(features)
-        predict, _ = lstm(features.view(20,1,20))
+        predict, hidden = lstm(features.view(20,1,20), hidden)
 	predict = sigmoid(predict)
-	predict =  predict[-1][0][0].data[0]
+	predict =  predict[-1][0][0].data.numpy().tolist()
         if predict < 0.5:
                 prediction = 0.0
         else:

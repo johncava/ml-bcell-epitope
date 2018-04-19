@@ -1,4 +1,5 @@
 from __future__ import division
+from split import chop
 import numpy as np
 import pickle 
 
@@ -53,3 +54,12 @@ def embedding(model, seq):
     #Third Split
     third = split(2, model, seq, third)
     return [first, second, third]
+
+def load_test(data):
+    array = []
+    with open(data, 'r') as file:
+       for line in file:
+          line = line.strip('\n')
+          array.append(line)
+    return list(chop(3,array))
+
