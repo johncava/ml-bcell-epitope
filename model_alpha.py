@@ -34,6 +34,9 @@ data = pos_data + neg_data
 data = np.array(data)
 np.random.shuffle(data)
 
+data1, data2, test = np.array_split(data,3)
+
+data = np.array(data1.tolist() + data2.tolist())
 data = data.tolist()
 #x,y = data[0][0], data[0][1]
 #print x
@@ -74,7 +77,8 @@ class Alpha(torch.nn.Module):
 
 		self.fc = torch.nn.Sequential(
 			torch.nn.Linear(50,50),
-			#torch.nn.Dropout(),
+			torch.nn.LeakyReLU(),
+			torch.nn.Linear(50,50),
 			torch.nn.LeakyReLU(),
 			torch.nn.Linear(50,2)
 		)
@@ -87,9 +91,9 @@ class Alpha(torch.nn.Module):
 		ans = self.fc(connect)
 		return F.softmax(ans, dim=1)
 
-loss_fn = torch.nn.BCELoss(size_average=True)
+loss_fn = torch.nn.MSELoss(size_average=True)
 
-learning_rate = 1e-3
+learning_rate = 1e-4
 
 model = Alpha()
 
@@ -99,7 +103,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 #print data[0]
 
-batch = 10
+batch = 5
 
 for epoch in xrange(10):
 	for index in xrange(int(len(data)/batch)):
@@ -153,6 +157,41 @@ for epoch in xrange(10):
 	#break
 # Testing
 
+
+total = 0
+correct = 0
+for item in xrange(len(test)):
+	features ,label = test[item][0], test[item][1]
+	#features = np.array(features)
+	label = np.array(label, dtype=np.float64)
+	features1 = torch.from_numpy(np.array([features[0]]))
+	features1 = features1.float()
+	features1 = Variable(features1)
+
+	features2 = torch.from_numpy(np.array([features[1]]))
+	features2 = features2.float()
+	features2 = Variable(features2)
+
+	features3 = torch.from_numpy(np.array([features[2]]))
+	features3 = features3.float()
+	features3 = Variable(features3)
+	predict = model.forward(features1,features2,features3).data.numpy()
+
+	class1, class2 = y_pred[0][0].data.numpy().tolist(), y_pred[0][1].data.numpy().tolist()
+	#print class1, class2
+	class_ = None
+	#print label
+	if class1 > class2:
+		class_ = [1.0,0.0]
+	else:
+		class_ = [0.0,1.0]
+	if class_ == label.tolist():
+		correct = correct + 1
+	total = total + 1
+print correct, correct/total, total
+
+
+'''
 window = 20
 for test in test_data:
 	sequence, label = test[1], test[2]
@@ -188,3 +227,4 @@ for test in test_data:
 	for index, p in enumerate(prediction):
 		prediction[index] = sum(p) / float(len(p))
 	print prediction
+'''

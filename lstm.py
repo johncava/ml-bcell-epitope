@@ -1,8 +1,12 @@
 from __future__ import division
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
 import numpy as np
+
 '''
 a = np.array([[1,6,11],[2,7,12],[3,8,13],[4,9,14],[5,10,15]])
 a = torch.from_numpy(a)
@@ -91,6 +95,7 @@ train_y = train_y.float()
 train_y = Variable(train_y)
 '''
 iterations = 100
+#lstm = nn.LSTM(20,1,3)
 lstm = nn.LSTM(20,1,3)
 loss_fn = torch.nn.MSELoss(size_average=False)
 learning_rate = 1e-4
@@ -101,6 +106,8 @@ optimizer = torch.optim.Adam(lstm.parameters(), lr=learning_rate)
 hidden = (Variable(torch.randn(3, 1, 1)),
           Variable(torch.randn((3, 1, 1))))
 
+loss_list = []
+iteration_list = range(1,101)
 for iteration in xrange(iterations):
 	num = np.random.choice(len(data),1)
 	
@@ -121,7 +128,9 @@ for iteration in xrange(iterations):
 	last_output = output[-1]
 	loss = loss_fn(last_output, train_y)
 	if iteration%1 == 0:
-		print loss[0].data.numpy().tolist()
+		l = loss[0][0].data.numpy().tolist()
+                print l
+                loss_list.append(l)
 	optimizer.zero_grad()
 	loss.backward(retain_graph=True)
 	optimizer.step()
@@ -131,6 +140,7 @@ correct = 0
 prediction = -1
 test = test.tolist()
 for item in xrange(len(test)):
+        hidden = (Variable(torch.randn(3, 1, 1)),Variable(torch.randn((3, 1, 1))))
         features ,label = test[item][:20], test[item][-1]
         features = np.array(features)
         label = np.array(label, dtype=np.float64)
@@ -148,4 +158,13 @@ for item in xrange(len(test)):
                 correct = correct + 1
         total = total + 1
 print correct, correct/total, total
-	
+
+'''
+plt.plot(iteration_list, loss_list)
+plt.legend(['Loss'], loc='upper left')
+plt.xlabel('Iterations')
+plt.ylabel('MSE Error')
+plt.title('LSTM 1 Layer (lr = 1e-4)')
+plt.show()
+plt.savefig('results_LSTM_1layer_lr=1e-4.png')
+'''

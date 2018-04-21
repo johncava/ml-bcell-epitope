@@ -3,3 +3,4 @@
 *.pklc
 /data
 test2.py
+.vscode/

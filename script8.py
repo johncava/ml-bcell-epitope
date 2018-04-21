@@ -1,9 +1,13 @@
 from __future__ import division
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 from utility import *
 import torch
 import random
 from torch.autograd import Variable
 import torch.nn.functional as F
+from split import chop
 
 test_data = load_test('SEQ194.txt')
 #print test[0]
@@ -59,8 +63,8 @@ class Discrim(torch.nn.Module):
         self.linear = torch.nn.Linear(24,12).double()
         self.linear2 = torch.nn.Linear(12,12).double()
         self.linear3 = torch.nn.Linear(12,2).double()
-		self.tanh = torch.nn.Tanh()
-		self.sigmoid = torch.nn.Sigmoid()
+        self.tanh = torch.nn.Tanh()
+        self.sigmoid = torch.nn.Sigmoid()
 	
     def forward(self, input):
         x = self.c1(input)
@@ -73,12 +77,12 @@ class Discrim(torch.nn.Module):
         x = self.p2(x)
         x = self.linear(x.view(1,24))
         x = self.relu(x)
-		#x = self.drop(x)
-		x = self.linear2(x)
-		x = self.relu(x)
-		x = self.linear3(x)
+        #x = self.drop(x)
+        x = self.linear2(x)
+        x = self.relu(x)
+        x = self.linear3(x)
         #ireturn self.tanh(x)
-		return F.softmax(x)
+        return F.softmax(x)
  
 loss_fn = torch.nn.BCELoss(size_average=True)
 
@@ -92,31 +96,58 @@ optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 #print data[0]
 
+loss_list = []
 for epoch in xrange(10):
-	for index in xrange(len(data)):
-		#print index
-		train = data[index]
-		x , y = train[0] , train[1]
-		#print x,y
-		#break
-		x = Variable(torch.from_numpy(np.array(x)), requires_grad = False).view(1,3,100).double()
+    for index in xrange(len(data)):
+        #print index
+        train = data[index]
+        x , y = train[0] , train[1]
+        #print x,y
+        #break
+        x = Variable(torch.from_numpy(np.array(x)), requires_grad = False).view(1,3,100).double()
 
-		inpt_train_y = torch.from_numpy(np.array([y]))
-		inpt_train_y = inpt_train_y.double()
-		inpt_train_y = Variable(inpt_train_y, requires_grad=False)
-		#print inpt_train_y
-		y_pred = model(x)
-		loss = loss_fn(y_pred, inpt_train_y)
-		if index%100 == 0:
-			print '--------'
-			#print y_pred[0][0].data.numpy().tolist(), y_pred[0][1].data.numpy().tolist()
-			#print inpt_train_y
-			print loss
-		optimizer.zero_grad()
-		loss.backward()
-		optimizer.step()
+        inpt_train_y = torch.from_numpy(np.array([y]))
+        inpt_train_y = inpt_train_y.double()
+        inpt_train_y = Variable(inpt_train_y, requires_grad=False)
+        #print inpt_train_y
+        y_pred = model(x)
+        loss = loss_fn(y_pred, inpt_train_y)
+        if index%1 == 0:
+            #print '--------'
+            #print y_pred[0][0].data.numpy().tolist(), y_pred[0][1].data.numpy().tolist()
+            #print inpt_train_y
+            #print loss
+            loss_list.append(loss[0].data.numpy().tolist())
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
 # Testing
+'''
+total = 0
+correct = 0
+for item in xrange(len(test)):
+    features ,label = test[item][0], test[item][1]
+    features = np.array(features)
+    label = np.array(label, dtype=np.float64)
+    features = torch.from_numpy(features)
+    features = features.float()
+    features = Variable(features)
+    predict = model.forward(features.view(1,3,100).double()).data.numpy()
+
+    class1, class2 = y_pred[0][0].data.numpy().tolist(), y_pred[0][1].data.numpy().tolist()
+    #print class1, class2
+    class_ = None
+    print label
+    if class1 > class2:
+        class_ = [1.0,0.0]
+    else:
+        class_ = [0.0,1.0]
+    if class_ == label.tolist():
+        correct = correct + 1
+    total = total + 1
+print correct, correct/total, total
+'''
 
 window = 20
 for test in test_data:
@@ -147,5 +178,15 @@ for test in test_data:
 	#break
 	for index, p in enumerate(prediction):
 		prediction[index] = sum(p) / float(len(p))
-	print prediction
+	print calculate_roc(prediction, [float(x) for x in list(label)])
 
+'''
+iteration_list = range(1, len(loss_list) + 1)
+plt.plot(iteration_list, loss_list)
+plt.legend(['Loss'], loc='upper left')
+plt.xlabel('Iterations')
+plt.ylabel('MSE Error')
+plt.title('Convolutional Neural Network (lr = 1e-2)')
+plt.show()
+plt.savefig('results_CNN_lr=1e-2.png')
+'''

@@ -8,24 +8,18 @@ def calculate_roc(predict, true):
 	FP = 0
 	TN = 0
 	FN = 0
-	print predict
-	print true
-	print len(predict), len(true)
 	sensitivity, specificity = 0,0
-	print predict[1]
 	for i in xrange(len(predict)):
-		print i
 		if predict[i] == 1.0 and true[i] == 1.0:
 			TP = TP + 1
-		elif predict[i] == 1.0 and true[i] == -1.0:
+		elif predict[i] == 1.0 and true[i] == 0.0:
 			FP = FP + 1
-		elif predict[i] == -1.0 and true[i] == -1.0:
+		elif predict[i] == 0.0 and true[i] == 0.0:
 			TN = TN + 1
-		elif predict[i] == -1.0 and true[i] == 1.0:
+		elif predict[i] == 0.0 and true[i] == 1.0:
 			FN = FN + 1
-	print "done"
-	sensitivity = TP/(TP + FN)
-	specificity = TN/(FP + TN)
+	sensitivity = TP/(TP + FN + 0.00000000001)
+	specificity = TN/(FP + TN + 0.00000000001)
 	return sensitivity, specificity
 
 def load_obj(name):
@@ -63,3 +57,13 @@ def load_test(data):
           array.append(line)
     return list(chop(3,array))
 
+def create_seq194(data):
+    array = []
+    with open(data, 'r') as file:
+       for line in file:
+          line = line.strip('\n')
+          array.append(line)
+    array = list(chop(3,array))
+    with open('seq194_dataset.data', 'w') as file:
+        for line in array:
+            file.write(' '.join(line[1]) +'\t' + ' '.join(line[2]) +'\n')
