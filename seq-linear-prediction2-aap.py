@@ -75,7 +75,7 @@ def encode_output(y):
 		return [0.0,1.0]
 
 model = Model()
-
+'''
 loss_function = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
@@ -120,10 +120,10 @@ plt.title('Entropy Loss of Linear and LSTM (2 Layer) with AA Vectorization lr=1e
 plt.show()
 plt.savefig('result_seq_linear_2_aap_lr=1e-3.png')
 
-
+'''
 
 # Testing
-'''
+
 model.load_state_dict(torch.load('seq-linear-2-aap.model'))
 
 for sequence in xrange(len(test)):
@@ -154,4 +154,4 @@ for sequence in xrange(len(test)):
         sensitivity = TP/float(TP + FN)
         specificity = TN/float(FP + TN)
         print (TP,FP,TN,FN)
-'''
+

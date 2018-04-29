@@ -47,11 +47,12 @@ class Model(nn.Module):
 		self.hidden = self.init_hidden()
 
 	def init_hidden(self):
-		return (autograd.Variable(torch.randn(1, 1, 2)),
-			autograd.Variable(torch.randn((1, 1, 2))))
+		return (autograd.Variable(torch.zeros(1, 1, 2)),
+			autograd.Variable(torch.zeros((1, 1, 2))))
 
 	def forward(self,i):
 		out, self.hidden = self.lstm(i.view(1, 1, -1), self.hidden)
+		out = F.softmax(out)
 		return out
 
 def encode_input(x):
@@ -64,7 +65,7 @@ def encode_output(y):
 		return [0.0,1.0]
 
 model = Model()
-'''
+
 loss_function = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
@@ -106,9 +107,9 @@ plt.savefig('result_seq_lr=1e-3_6epochs.png')
 
 print 'Done 1'
 torch.save(model.state_dict(), "seq.model")
+
+
 '''
-
-
 # Testing
 
 model.load_state_dict(torch.load('seq.model'))
@@ -141,3 +142,4 @@ for sequence in xrange(len(test)):
 	specificity = TN/float(FP + TN)
 	print (TP,FP,TN,FN)
 	#average_list.append(accuracy/float(len(output)))
+'''
