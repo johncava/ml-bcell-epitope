@@ -64,6 +64,7 @@ def encode_output(y):
 		return [0.0,1.0]
 
 model = Model()
+'''
 loss_function = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
@@ -105,4 +106,38 @@ plt.savefig('result_seq_lr=1e-3_6epochs.png')
 
 print 'Done 1'
 torch.save(model.state_dict(), "seq.model")
+'''
 
+
+# Testing
+
+model.load_state_dict(torch.load('seq.model'))
+
+for sequence in xrange(len(test)):
+	inputs = [Variable(torch.Tensor(encode_input(x))) for x in test[sequence][1]]
+	output = [Variable(torch.Tensor(encode_output(y))) for y in test[sequence][2]]
+	model.hidden = model.init_hidden()
+	accuracy = 0
+	TP = 0
+	FP = 0
+	TN = 0
+	FN = 0
+	for i, label in zip(inputs, output):
+		prediction = model(i).view(1,2)
+		predict = torch.max(prediction,1)[1].data.numpy().tolist()[0]
+		true = torch.max(label,0)[1].data.numpy().tolist()
+		#if predict == 1.0:
+		#	print 'Hello World!'
+		#print true
+		if predict == 1 and true == 1:
+			TP = TP + 1
+		elif predict == 1 and true == 0:
+			FP = FP + 1
+		elif predict == 0 and true == 0:
+			TN = TN + 1
+		elif predict == 0 and true == 1:
+			FN = FN + 1
+	sensitivity = TP/float(TP + FN)
+	specificity = TN/float(FP + TN)
+	print (TP,FP,TN,FN)
+	#average_list.append(accuracy/float(len(output)))

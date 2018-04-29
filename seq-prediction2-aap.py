@@ -45,8 +45,10 @@ class Model(nn.Module):
 	def __init__(self):
 		super(Model, self).__init__()
 		self.lstm = nn.LSTM(4,2)
+		self.lstm2 = nn.LSTM(2,2)
 		self.sigmoid = nn.Sigmoid()
 		self.hidden = self.init_hidden()
+		self.hidden2 = self.init_hidden()
 
 	def init_hidden(self):
 		return (autograd.Variable(torch.randn(1, 1, 2)),
@@ -54,7 +56,8 @@ class Model(nn.Module):
 
 	def forward(self,i):
 		out, self.hidden = self.lstm(i.view(1, 1, -1), self.hidden)
-		return out
+		out2, self.hidden2 = self.lstm2(out.view(1,1,-1), self.hidden2)
+		return out2
 
 def encode_input(x):
 	return table_hot[x]
@@ -67,7 +70,7 @@ def encode_output(y):
 
 model = Model()
 loss_function = nn.CrossEntropyLoss()
-optimizer = optim.SGD(model.parameters(), lr=1e-3)
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 # initialize the hidden state. Keep hidden layer resets out of the training phase (maybe except when testing)
 hidden = (autograd.Variable(torch.randn(1, 1, 2)),
@@ -87,6 +90,7 @@ for epoch in xrange(3):
 		loss = 0
 		optimizer.zero_grad()
 		model.hidden = model.init_hidden()	
+		model.hidden2 = model.init_hidden()
 		for i, label in zip(inputs,outputs):
 			# Step through the sequence one element at a time.
 			# after each step, hidden contains the hidden state.
@@ -105,17 +109,18 @@ np.save('lstm1_loss.npy',loss_array)
 '''
 
 print 'Done 1'
-#torch.save(model.state_dict(), "seq-aap.model")
+torch.save(model.state_dict(), "seq2-aap.model")
 
-'''
+
 plt.plot(xrange(1,len(loss_array) + 1), loss_array)
 plt.xlabel('Iterations')
 plt.ylabel('Cross Entropy Loss')
-plt.title('Entropy Loss of LSTM with AA Vectorization lr=1e-6')
+plt.title('Entropy Loss of LSTM (2 Layer) with AA Vectorization lr=1e-3')
 plt.show()
-plt.savefig('result_seq_aap_lr=1e-6.png')
-'''
+plt.savefig('result_seq2_aap_lr=1e-3.png')
 
+
+'''
 # Testing
 
 #model.load_state_dict(torch.load('seq-aap.model'))
@@ -147,4 +152,4 @@ for sequence in xrange(len(test)):
         sensitivity = TP/float(TP + FN)
         specificity = TN/float(FP + TN)
         print (TP,FP,TN,FN)
-
+'''

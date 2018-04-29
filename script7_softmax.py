@@ -148,4 +148,5 @@ for test in test_data:
 	for index, p in enumerate(prediction):
 		prediction[index] = sum(p) / float(len(p))
 	print prediction
+	
 
