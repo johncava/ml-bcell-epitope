@@ -95,14 +95,14 @@ for epoch in xrange(3):
 		#print 'Sequence ', (sequence + 1)
 		loss.backward()#retain_graph=True)
 		optimizer.step()
-'''
-np.save('lstm1_loss.npy',loss_array)
-print 'Done 1'
-torch.save(model.state_dict(), "lstm1.model")
-'''
+
 plt.plot(xrange(1,len(loss_array) + 1), loss_array)
 plt.xlabel('Iterations')
 plt.ylabel('Cross Entropy Loss')
-plt.title('Entropy Loss of LSTM with One Hot Encoded lr=1e-1')
+plt.title('Entropy Loss of LSTM with One Hot Encoded lr=1e-3 (5 epochs)')
 plt.show()
-plt.savefig('result_seq_lr=1e-1.png')
+plt.savefig('result_seq_lr=1e-3_5epochs.png')
+
+print 'Done 1'
+torch.save(model.state_dict(), "seq.model")
+
