@@ -67,7 +67,7 @@ def encode_output(y):
 
 model = Model()
 loss_function = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=1e-3)
+optimizer = optim.Adam(model.parameters(), lr=1e-6)
 
 # initialize the hidden state. Keep hidden layer resets out of the training phase (maybe except when testing)
 hidden = (autograd.Variable(torch.randn(1, 1, 2)),
@@ -107,6 +107,6 @@ torch.save(model.state_dict(), "lstm1.model")
 plt.plot(xrange(1,len(loss_array) + 1), loss_array)
 plt.xlabel('Iterations')
 plt.ylabel('Cross Entropy Loss')
-plt.title('Entropy Loss of LSTM with AA Vectorization lr=1e-3')
+plt.title('Entropy Loss of LSTM with AA Vectorization lr=1e-6')
 plt.show()
-plt.savefig('result_seq_aap_lr=1e-3.png')
+plt.savefig('result_seq_aap_lr=1e-6.png')
