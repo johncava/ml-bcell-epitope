@@ -52,7 +52,6 @@ class Model(nn.Module):
 
 	def forward(self,i):
 		out, self.hidden = self.lstm(i.view(1, 1, -1), self.hidden)
-		out = F.softmax(out)
 		return out
 
 def encode_input(x):
