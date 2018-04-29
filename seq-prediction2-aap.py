@@ -69,6 +69,7 @@ def encode_output(y):
 		return [0.0,1.0]
 
 model = Model()
+'''
 loss_function = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
@@ -104,9 +105,7 @@ for epoch in xrange(3):
 		loss.backward()#retain_graph=True)
 		optimizer.step()
 
-'''
 np.save('lstm1_loss.npy',loss_array)
-'''
 
 print 'Done 1'
 torch.save(model.state_dict(), "seq2-aap.model")
@@ -123,13 +122,14 @@ plt.savefig('result_seq2_aap_lr=1e-3.png')
 '''
 # Testing
 
-#model.load_state_dict(torch.load('seq-aap.model'))
+model.load_state_dict(torch.load('seq2-aap.model'))
 
 for sequence in xrange(len(test)):
         inputs = [Variable(torch.Tensor(encode_input(x))) for x in test[sequence][1]]
         output = [Variable(torch.Tensor(encode_output(y))) for y in test[sequence][2]]
         model.hidden = model.init_hidden()
-        accuracy = 0
+        model.hidden2 = model.init_hidden()
+	accuracy = 0
         TP = 0
         FP = 0
         TN = 0
@@ -152,4 +152,3 @@ for sequence in xrange(len(test)):
         sensitivity = TP/float(TP + FN)
         specificity = TN/float(FP + TN)
         print (TP,FP,TN,FN)
-'''
