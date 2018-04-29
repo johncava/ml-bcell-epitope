@@ -48,18 +48,21 @@ class Model(nn.Module):
 		self.lstm2 = nn.LSTM(2,2)
 		self.linear = nn.Linear(4,4)
 		self.linear2 = nn.Linear(4,4)
+		self.linear3 = nn.Linear(2,2)
 		self.hidden = self.init_hidden()
 		self.hidden2 = self.init_hidden()
 
 	def init_hidden(self):
-		return (autograd.Variable(torch.randn(1, 1, 2)),
-			autograd.Variable(torch.randn((1, 1, 2))))
+		return (autograd.Variable(torch.zeros(1, 1, 2)),
+			autograd.Variable(torch.zeros((1, 1, 2))))
 
 	def forward(self,i):
 		i = self.linear(i)
 		i = self.linear(i)
 		out, self.hidden = self.lstm(i.view(1, 1, -1), self.hidden)
 		out2, self.hidden2 = self.lstm2(out.view(1,1,-1), self.hidden2)
+		out2 = self.linear3(out2)
+		out2 = F.softmax(out2)
 		return out2
 
 def encode_input(x):
@@ -118,10 +121,10 @@ plt.show()
 plt.savefig('result_seq_linear_2_aap_lr=1e-3.png')
 
 
-'''
-# Testing
 
-model.load_state_dict(torch.load('seq2-aap.model'))
+# Testing
+'''
+model.load_state_dict(torch.load('seq-linear-2-aap.model'))
 
 for sequence in xrange(len(test)):
         inputs = [Variable(torch.Tensor(encode_input(x))) for x in test[sequence][1]]
