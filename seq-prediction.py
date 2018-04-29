@@ -65,7 +65,7 @@ def encode_output(y):
 
 model = Model()
 loss_function = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=1e-1)
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
 # initialize the hidden state. Keep hidden layer resets out of the training phase (maybe except when testing)
 hidden = (autograd.Variable(torch.randn(1, 1, 2)),
