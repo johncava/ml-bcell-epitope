@@ -66,7 +66,7 @@ def encode_output(y):
 model = Model()
 
 loss_function = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=1e-3)
+optimizer = optim.Adam(model.parameters(), lr=1e-6)
 
 # initialize the hidden state. Keep hidden layer resets out of the training phase (maybe except when testing)
 hidden = (autograd.Variable(torch.randn(1, 1, 2)),
@@ -100,15 +100,15 @@ for epoch in xrange(6):
 plt.plot(xrange(1,len(loss_array) + 1), loss_array)
 plt.xlabel('Iterations')
 plt.ylabel('Cross Entropy Loss')
-plt.title('Entropy Loss of LSTM with One Hot Encoded lr=1e-3 (6 epochs)')
+plt.title('Entropy Loss of LSTM with One Hot Encoded lr=1e-6 (6 epochs)')
 plt.show()
-plt.savefig('result_seq_lr=1e-3_6epochs.png')
+plt.savefig('result_seq_lr=1e-6_6epochs.png')
 
 print 'Done 1'
 torch.save(model.state_dict(), "seq.model")
 
 
-'''
+
 # Testing
 
 model.load_state_dict(torch.load('seq.model'))
@@ -124,6 +124,7 @@ for sequence in xrange(len(test)):
 	FN = 0
 	for i, label in zip(inputs, output):
 		prediction = model(i).view(1,2)
+		prediction = F.softmax(prediction)
 		predict = torch.max(prediction,1)[1].data.numpy().tolist()[0]
 		true = torch.max(label,0)[1].data.numpy().tolist()
 		#if predict == 1.0:
@@ -141,4 +142,3 @@ for sequence in xrange(len(test)):
 	specificity = TN/float(FP + TN)
 	print (TP,FP,TN,FN)
 	#average_list.append(accuracy/float(len(output)))
-'''
