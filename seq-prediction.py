@@ -75,7 +75,7 @@ loss = 0
 
 loss_array = []
 
-for epoch in xrange(3):
+for epoch in xrange(6):
 	#l = 0
 	# Note: reset loss such that doesn't accumulate after each epoch
 	for sequence in xrange(len(train)):
@@ -99,9 +99,9 @@ for epoch in xrange(3):
 plt.plot(xrange(1,len(loss_array) + 1), loss_array)
 plt.xlabel('Iterations')
 plt.ylabel('Cross Entropy Loss')
-plt.title('Entropy Loss of LSTM with One Hot Encoded lr=1e-3 (5 epochs)')
+plt.title('Entropy Loss of LSTM with One Hot Encoded lr=1e-3 (6 epochs)')
 plt.show()
-plt.savefig('result_seq_lr=1e-3_5epochs.png')
+plt.savefig('result_seq_lr=1e-3_6epochs.png')
 
 print 'Done 1'
 torch.save(model.state_dict(), "seq.model")
