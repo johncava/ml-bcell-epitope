@@ -1,3 +1,7 @@
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 import torch
 import torch.autograd as autograd
 import torch.nn as nn
@@ -71,12 +75,12 @@ loss = 0
 
 loss_array = []
 
-for epoch in xrange(1):
+for epoch in xrange(3):
 	#l = 0
 	# Note: reset loss such that doesn't accumulate after each epoch
 	for sequence in xrange(len(train)):
-		inputs = [Variable(torch.Tensor(encode_input(x))) for x in train[sequence][0]]
-		outputs = [Variable(torch.Tensor(encode_output(y))).view(1,2).long() for y in train[sequence][1]]		
+		inputs = [Variable(torch.Tensor(encode_input(x))) for x in train[sequence][1]]
+		outputs = [Variable(torch.Tensor(encode_output(y))).view(1,2).long() for y in train[sequence][2]]		
 		loss = 0
 		optimizer.zero_grad()
 		model.hidden = model.init_hidden()	
@@ -85,9 +89,9 @@ for epoch in xrange(1):
 			# after each step, hidden contains the hidden state.
 			out = model(i)
 			#loss += loss_function(out.view(1,9),label)
-			loss += loss_function(out.view(1,9), torch.max(label, 1)[1])
+			loss += loss_function(out.view(1,2), torch.max(label, 1)[1])
 			#l = loss
-		loss_array.append(loss[0].data.numpy().tolist()[0])
+		loss_array.append(loss[0].data.numpy().tolist())
 		#print 'Sequence ', (sequence + 1)
 		loss.backward()#retain_graph=True)
 		optimizer.step()
@@ -95,3 +99,10 @@ for epoch in xrange(1):
 np.save('lstm1_loss.npy',loss_array)
 print 'Done 1'
 torch.save(model.state_dict(), "lstm1.model")
+'''
+plt.plot(xrange(1,len(loss_array) + 1), loss_array)
+plt.xlabel('Iterations')
+plt.ylabel('Cross Entropy Loss')
+plt.title('Entropy Loss of LSTM with One Hot Encoded lr=1e-3')
+plt.show()
+plt.savefig('result_seq_lr=1e-3.png')
